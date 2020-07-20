@@ -104,12 +104,13 @@ class SASceneNet(nn.Module):
         self.in_block_sem_1 = BasicBlockSem(64, 128, kernel_size=3, stride=2, padding=1)
         self.in_block_sem_2 = BasicBlockSem(128, 256, kernel_size=3, stride=2, padding=1)
         self.in_block_sem_3 = BasicBlockSem(256, 512, kernel_size=3, stride=2, padding=1)
+        self.in_block_sem_4 = BasicBlockSem(512, 1024, kernel_size=3, stride=2, padding=1)
 
         # -------------------------------------#
         #   RGB & Semantic Branch Classifiers  #
         # ------------------------------------ #
         # Semantic Scene Classification Layers
-        self.fc_SEM = nn.Linear(512, scene_classes)
+        self.fc_SEM = nn.Linear(1024, scene_classes)
 
         # RGB Scene Classification Layers.
         self.fc_RGB = nn.Linear(size_fc_RGB, scene_classes)
@@ -124,18 +125,18 @@ class SASceneNet(nn.Module):
             nn.ReLU(inplace=True),
         )
         self.lastConvRGB2 = nn.Sequential(
-            nn.Conv2d(sizes_lastConv[2], 1024, kernel_size=3, bias=False),
+            nn.Conv2d(sizes_lastConv[2], 2048, kernel_size=3, bias=False),
             nn.BatchNorm2d(1024),
             nn.ReLU(inplace=True),
         )
         self.lastConvSEM1 = nn.Sequential(
-            nn.Conv2d(512, 512, kernel_size=3, bias=False),
-            nn.BatchNorm2d(512),
+            nn.Conv2d(1024, 1024, kernel_size=3, bias=False),
+            nn.BatchNorm2d(1024),
             nn.ReLU(inplace=True),
         )
         self.lastConvSEM2 = nn.Sequential(
-            nn.Conv2d(512, 1024, kernel_size=3, bias=False),
-            nn.BatchNorm2d(1024),
+            nn.Conv2d(1024, 2048, kernel_size=3, bias=False),
+            nn.BatchNorm2d(2048),
             nn.ReLU(inplace=True),
         )
 
@@ -146,7 +147,7 @@ class SASceneNet(nn.Module):
         self.sigmoid = nn.Sigmoid()
         self.avgpool7 = nn.AvgPool2d(7, stride=1)
         self.avgpool3 = nn.AvgPool2d(3, stride=1)
-        self.fc = nn.Linear(1024, scene_classes)
+        self.fc = nn.Linear(2048, scene_classes)
 
         # Loss
         self.criterion = nn.CrossEntropyLoss()
